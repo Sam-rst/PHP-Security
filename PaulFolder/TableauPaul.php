@@ -85,7 +85,6 @@
 // Initialiser la variable d'état du formulaire
 $formSubmitted = false;
 
-// Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupérer les valeurs du formulaire
     $firstname = validateInput($_POST["firstname"]);
@@ -96,17 +95,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $birthday = validateInput($_POST["birthday"]);
     $description = validateInput($_POST["description"]);
 
-    // Vous pouvez faire des traitements supplémentaires avec ces données, par exemple, les enregistrer dans une base de données
-    // Pour l'instant, nous allons simplement afficher les valeurs
-    $formSubmitted = true;
+    // Connexion à la base de données (remplacez les valeurs par celles de votre configuration)
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "Php_Secure_Paul";
+
+    $conn = new mysqli($servername, $username, $password, $dbname);
+
+    // Vérifier la connexion à la base de données
+    if ($conn->connect_error) {
+        die("Connection failed: " . $conn->connect_error);
+    }
+
+    // Préparer la requête d'insertion
+    $stmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("sssssss", $firstname, $lastname, $password, $email, $phone, $birthday, $description);
+
+    // Exécuter la requête
+    if ($stmt->execute()) {
+        $formSubmitted = true;
+    }
+
+    // Fermer la connexion
+    $stmt->close();
+    $conn->close();
 }
 
 // Fonction pour valider les entrées
 function validateInput($data) {
-    $data = trim($data);
-    $data = stripslashes($data);
+    // Échapper les caractères spéciaux pour éviter les attaques XSS
     $data = htmlspecialchars($data);
+    // Nettoyer les espaces inutiles
+    $data = trim($data);
+    // Supprimer les antislashs pour éviter les attaques par injection
+    $data = stripslashes($data);
     return $data;
+}
+
+// Fonction pour valider l'adresse email
+function validateEmail($email) {
+    // Échapper les caractères spéciaux pour éviter les attaques XSS
+    $email = htmlspecialchars($email);
+    // Valider l'adresse email avec filter_var
+    $email = filter_var($email, FILTER_VALIDATE_EMAIL);
+    return $email;
 }
 ?>
 
