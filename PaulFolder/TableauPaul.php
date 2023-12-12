@@ -23,6 +23,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 300px;
             margin-bottom: 20px; /* Ajout d'une marge en bas pour espacer le formulaire de la section suivante */
+            margin-top : 20px;
         }
 
         h2 {
@@ -192,11 +193,13 @@ function validateEmail($email) {
     
     <?php
     // Afficher le message de succès ou d'erreur en fonction de l'état du formulaire
+    // Afficher le message de succès ou d'erreur en fonction de l'état du formulaire
     if ($formSubmitted) {
         echo '<div class="success-message">Informations soumises avec succès !</div>';
-    } else {
+    } elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo '<div class="error-message">Veuillez remplir le formulaire.</div>';
     }
+
     ?>
 </form>
 
