@@ -14,6 +14,7 @@
             flex-direction: column; /* Mettez en colonne les éléments à l'intérieur du body */
             align-items: center;
             height: 100vh;
+            margin-top: 20px;
         }
 
         form {
@@ -98,28 +99,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Connexion à la base de données (remplacez les valeurs par celles de votre configuration)
     $servername = "localhost";
-    $username = "root";
-    $password = "";
+    $dbUsername = "root";
+    $dbPassword = "";
     $dbname = "Php_Secure_Paul";
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+    $conn = new mysqli($servername, $dbUsername, $dbPassword, $dbname);
 
     // Vérifier la connexion à la base de données
     if ($conn->connect_error) {
         die("Connection failed: " . $conn->connect_error);
     }
 
-    // Préparer la requête d'insertion
-    $stmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssssss", $firstname, $lastname, $password, $email, $phone, $birthday, $description);
+    // Vérifier si l'email existe déjà dans la base de données
+    $checkStmt = $conn->prepare("SELECT * FROM formulaire_data WHERE email = ?");
+    $checkStmt->bind_param("s", $email);
+    $checkStmt->execute();
+    $checkResult = $checkStmt->get_result();
 
-    // Exécuter la requête
-    if ($stmt->execute()) {
-        $formSubmitted = true;
+    if ($checkResult->num_rows > 0) {
+        // L'email existe déjà, afficher un message d'erreur
+        echo '<div class="error-message">L\'email est déjà utilisé</div>';
+    } else {
+        // L'email n'existe pas, procéder à l'insertion
+        // Préparer la requête d'insertion
+        $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $insertStmt->bind_param("sssssss", $firstname, $lastname, $password, $email, $phone, $birthday, $description);
+
+        // Exécuter la requête d'insertion
+        if ($insertStmt->execute()) {
+            $formSubmitted = true;
+        } else {
+            // Afficher un message d'erreur si l'insertion échoue
+            echo '<div class="error-message">Erreur lors de l\'insertion des données dans la base de données.</div>';
+        }
+
+        // Fermer le statement d'insertion
+        $insertStmt->close();
     }
 
+    // Fermer le statement de vérification
+    $checkStmt->close();
+
     // Fermer la connexion
-    $stmt->close();
     $conn->close();
 }
 
@@ -134,14 +155,6 @@ function validateInput($data) {
     return $data;
 }
 
-// Fonction pour valider l'adresse email
-function validateEmail($email) {
-    // Échapper les caractères spéciaux pour éviter les attaques XSS
-    $email = htmlspecialchars($email);
-    // Valider l'adresse email avec filter_var
-    $email = filter_var($email, FILTER_VALIDATE_EMAIL);
-    return $email;
-}
 ?>
 
 <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
@@ -199,6 +212,10 @@ function validateEmail($email) {
     } elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo '<div class="error-message">Veuillez remplir le formulaire.</div>';
     }
+
+
+
+
 
     ?>
 </form>
