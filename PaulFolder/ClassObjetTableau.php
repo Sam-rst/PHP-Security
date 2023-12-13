@@ -10,45 +10,55 @@
 
 <body>
 
-    <?php
-    $formSubmitted = false;
+<?php
 
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        $data = [
-            'firstname' => $_POST["firstname"],
-            'lastname' => $_POST["lastname"],
-            'password' => $_POST["password"],
-            'email' => $_POST["email"],
-            'phone' => $_POST["phone"],
-            'birthday' => $_POST["birthday"],
-            'description' => $_POST["description"]
-        ];
+class FormulaireData
+{
+    private $formSubmitted = false;
+    private $data = [];
 
-        // Validation des données du formulaire
-        if (validateFormData($data)) {
-            // Insertion des données dans la base de données
-            $formSubmitted = insertData($data);
+    public function __construct()
+    {
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $this->data = [
+                'firstname' => $_POST["firstname"],
+                'lastname' => $_POST["lastname"],
+                'password' => $_POST["password"],
+                'email' => $_POST["email"],
+                'phone' => $_POST["phone"],
+                'birthday' => $_POST["birthday"],
+                'description' => $_POST["description"]
+            ];
+
+            $this->handleFormSubmission();
+        }
+    }
+
+    public function handleFormSubmission()
+    {
+        if ($this->validateFormData()) {
+            $this->formSubmitted = $this->insertData();
         } else {
             echo '<div class="error-message message">Veuillez remplir correctement tous les champs du formulaire.</div>';
         }
     }
 
-function validateFormData($data) {
-    // Validation de chaque champ
-    foreach ($data as $value) {
-        if (empty($value)) {
-            return false;
+    public function validateFormData()
+    {
+        foreach ($this->data as $key => $value) {
+            if (empty($value)) {
+                return false;
+            }
+            $this->data[$key] = trim($value);
+            $this->data[$key] = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+            if (empty($this->data[$key])) {
+                return false;
+            }
         }
-        $value = trim($value);
-        $value = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-        if (empty($value)) {
-            return false;
-        }
+        return true;
     }
-    return true;
-}
 
-    function insertData($data)
+    public function insertData()
     {
         $servername = "localhost";
         $dbUsername = "root";
@@ -56,33 +66,55 @@ function validateFormData($data) {
         $dbname = "Php_Secure_Paul";
 
         try {
-            // Connexion à la base de données
             $conn = new PDO("mysql:host=$servername;dbname=$dbname", $dbUsername, $dbPassword);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Vérification si l'email existe déjà
             $checkStmt = $conn->prepare("SELECT * FROM formulaire_data WHERE email = ?");
-            $checkStmt->execute([$data['email']]);
+            $checkStmt->execute([$this->data['email']]);
             $checkResult = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
             if ($checkResult) {
                 echo '<div class="error-message message">L\'email est déjà utilisé</div>';
             } else {
-                // Insertion des données dans la base de données
                 $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $insertStmt->execute([$data['firstname'], $data['lastname'], $data['password'], $data['email'], $data['phone'], $data['birthday'], $data['description']]);
+                $insertStmt->execute([
+                    $this->data['firstname'], $this->data['lastname'], $this->data['password'],
+                    $this->data['email'], $this->data['phone'], $this->data['birthday'], $this->data['description']
+                ]);
                 return true;
             }
         } catch (PDOException $e) {
             echo '<div class="error-message message">Erreur de connexion à la base de données: ' . $e->getMessage() . '</div>';
         } finally {
-            // Fermeture de la connexion
             $conn = null;
         }
 
         return false;
     }
-    ?>
+
+    public function displaySuccessMessage()
+    {
+        if ($this->formSubmitted) {
+            echo '<div class="success-message message">Informations soumises avec succès !</div>';
+        }
+    }
+
+    public function displaySubmittedData()
+    {
+        if ($this->formSubmitted) {
+            echo '<div class="submitted-data">';
+            echo '<h2>Données soumises :</h2>';
+            foreach ($this->data as $key => $value) {
+                echo "<p>$key : $value</p>";
+            }
+            echo '</div>';
+        }
+    }
+}
+
+$FormulaireData = new FormulaireData();
+
+?>
 
     <form id="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
         <h2>Formulaire</h2>
@@ -132,26 +164,13 @@ function validateFormData($data) {
 
         <input type="submit" value="Soumettre">
 
-        <?php
-        // Affichage du message de succès
-        if ($formSubmitted) {
-            echo '<div class="success-message message">Informations soumises avec succès !</div>';
-        }
-        ?>
-
     </form>
 
     <?php
-    // Affichage des données soumises
-    if ($formSubmitted) {
-        echo '<div class="submitted-data">';
-        echo '<h2>Données soumises :</h2>';
-        foreach ($data as $key => $value) {
-            echo "<p>$key : $value</p>";
-        }
-        echo '</div>';
-    }
+    $FormulaireData->displaySuccessMessage();
+    $FormulaireData->displaySubmittedData();
     ?>
+
 
 </body>
 
