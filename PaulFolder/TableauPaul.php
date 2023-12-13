@@ -190,7 +190,7 @@ function validateInput($data) {
 
 ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+<form id="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
     <h2>Formulaire</h2>
     
     <!-- Champ pour le prénom -->

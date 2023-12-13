@@ -5,14 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Formulaire en PHP</title>
     <style>
-        /* Styles CSS */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
             display: flex;
-            flex-direction: column;
+            flex-direction: column; /* Mettez en colonne les éléments à l'intérieur du body */
             align-items: center;
             height: 100vh;
             margin-top: 20px;
@@ -24,24 +23,53 @@
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             width: 300px;
-            margin-bottom: 20px;
-            margin-top: 20px;
+            margin-bottom: 20px; /* Ajout d'une marge en bas pour espacer le formulaire de la section suivante */
+            margin-top : 20px;
         }
 
-        /* ... Styles restants ... */
-
-        .message {
-            font-weight: bold;
+        h2 {
             text-align: center;
-            margin-top: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input[type="submit"] {
+            background-color: #4caf50;
+            color: white;
+            cursor: pointer;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #45a049;
         }
 
         .success-message {
             color: #008000;
+            font-weight: bold;
+            text-align: center;
         }
 
         .error-message {
             color: #FF0000;
+            font-weight: bold;
+            text-align: center;
         }
 
         .submitted-data {
@@ -128,7 +156,7 @@ function insertData($data) {
 }
 ?>
 
-<form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+<form id="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
     <h2>Formulaire</h2>
 
     <label for="firstname">Prénom:</label>
@@ -150,7 +178,7 @@ function insertData($data) {
     <input type="date" name="birthday" required>
 
     <label for="description">Description:</label>
-    <textarea name="description" rows="4" cols="50" required></textarea>
+    <textarea id="description" name="description" rows="4" cols="50" required></textarea>
 
     <input type="submit" value="Soumettre">
 
