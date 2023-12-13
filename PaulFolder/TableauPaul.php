@@ -97,61 +97,94 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $birthday = validateInput($_POST["birthday"]);
     $description = validateInput($_POST["description"]);
 
-    // Connexion à la base de données (remplacez les valeurs par celles de votre configuration)
-    $servername = "localhost";
-    $dbUsername = "root";
-    $dbPassword = "";
-    $dbname = "Php_Secure_Paul";
-
-    $conn = new mysqli($servername, $dbUsername, $dbPassword, $dbname);
-
-    // Vérifier la connexion à la base de données
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    // Vérifier si l'email existe déjà dans la base de données
-    $checkStmt = $conn->prepare("SELECT * FROM formulaire_data WHERE email = ?");
-    $checkStmt->bind_param("s", $email);
-    $checkStmt->execute();
-    $checkResult = $checkStmt->get_result();
-
-    if ($checkResult->num_rows > 0) {
-        // L'email existe déjà, afficher un message d'erreur
-        echo '<div class="error-message">L\'email est déjà utilisé</div>';
+    // Vérifier si un champ est vide ou si les données sont corrompues  
+    if (!$firstname || !$lastname || !$password || !$email || !$phone || !$birthday || !$description) {
+        echo '<div class="error-message">Veuillez remplir correctement tous les champs du formulaire.</div>';
     } else {
-        // L'email n'existe pas, procéder à l'insertion
-        // Préparer la requête d'insertion
-        $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $insertStmt->bind_param("sssssss", $firstname, $lastname, $password, $email, $phone, $birthday, $description);
 
-        // Exécuter la requête d'insertion
-        if ($insertStmt->execute()) {
-            $formSubmitted = true;
-        } else {
-            // Afficher un message d'erreur si l'insertion échoue
-            echo '<div class="error-message">Erreur lors de l\'insertion des données dans la base de données.</div>';
+        // Connexion à la base de données (remplacez les valeurs par celles de votre configuration)
+        $servername = "localhost";
+        $dbUsername = "root";
+        $dbPassword = "";
+        $dbname = "Php_Secure_Paul";
+
+        try {
+
+            // $conn = new mysqli($servername, $dbUsername, $dbPassword, $dbname);
+
+            $conn = new PDO("mysql:host=$servername;dbname=$dbname", $dbUsername, $dbPassword);
+
+            // Configurer PDO pour signaler les erreurs
+            $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // Vérifier la connexion à la base de données
+            if ($conn->connect_error) {
+                die("Connection failed: " . $conn->connect_error);
+            }
+
+            // Vérifier si l'email existe déjà dans la base de données
+            $checkStmt = $conn->prepare("SELECT * FROM formulaire_data WHERE email = ?");
+            $checkStmt->bind_param("s", $email);
+            $checkStmt->execute();
+            $checkResult = $checkStmt->get_result();
+
+            if ($checkResult->num_rows > 0) {
+                // L'email existe déjà, afficher un message d'erreur
+                echo '<div class="error-message">L\'email est déjà utilisé</div>';
+            } else {
+                // L'email n'existe pas, procéder à l'insertion
+                // Préparer la requête d'insertion
+                $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
+                $insertStmt->bind_param("sssssss", $firstname, $lastname, $password, $email, $phone, $birthday, $description);
+
+                // Exécuter la requête d'insertion
+                if ($insertStmt->execute()) {
+                    $formSubmitted = true;
+                } else {
+                    // Afficher un message d'erreur si l'insertion échoue
+                    echo '<div class="error-message">Erreur lors de l\'insertion des données dans la base de données.</div>';
+                }
+
+                // Fermer le statement d'insertion
+                $insertStmt->close();
+            }
+        }catch (PDOException $e) {
+            // Gérer les erreurs de connexion à la base de données
+            echo '<div class="error-message">Erreur de connexion à la base de données: ' . $e->getMessage() . '</div>';
+        } finally {
+            // Fermer le statement de vérification
+            $checkStmt = null;
+
+            // Fermer la connexion
+            $conn = null;
         }
-
-        // Fermer le statement d'insertion
-        $insertStmt->close();
     }
 
-    // Fermer le statement de vérification
-    $checkStmt->close();
+    // // Fermer le statement de vérification
+    // $checkStmt->close();
 
-    // Fermer la connexion
-    $conn->close();
+    // // Fermer la connexion
+    // $conn->close();
 }
 
 // Fonction pour valider les entrées
 function validateInput($data) {
-    // Échapper les caractères spéciaux pour éviter les attaques XSS
-    $data = htmlspecialchars($data);
-    // Nettoyer les espaces inutiles
+    // Vérifier si les données ne sont pas vides
+    if (empty($data)) {
+        return false;
+    }
+
+    // Supprimer les espaces en début et fin
     $data = trim($data);
-    // Supprimer les antislashs pour éviter les attaques par injection
-    $data = stripslashes($data);
+
+    // Utiliser filter_var pour nettoyer et valider les données
+    $data = filter_var($data, FILTER_SANITIZE_STRING);
+
+    // Vérifier si les données ne sont toujours pas vides après le filtrage
+    if (empty($data)) {
+        return false;
+    }
+
     return $data;
 }
 
@@ -204,6 +237,7 @@ function validateInput($data) {
     <!-- Bouton de soumission du formulaire -->
     <input type="submit" value="Soumettre">
     
+
     <?php
     // Afficher le message de succès ou d'erreur en fonction de l'état du formulaire
     // Afficher le message de succès ou d'erreur en fonction de l'état du formulaire
@@ -212,12 +246,9 @@ function validateInput($data) {
     } elseif ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo '<div class="error-message">Veuillez remplir le formulaire.</div>';
     }
-
-
-
-
-
     ?>
+
+    
 </form>
 
 <!-- Section pour afficher les données soumises -->
