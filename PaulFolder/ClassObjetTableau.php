@@ -87,7 +87,6 @@ class FormulaireData
                 $insertStmt->bindParam(':description', $this->data['description'], PDO::PARAM_STR);
             
                 $insertStmt->execute();
-                return true;
             }
         } catch (PDOException $e) {
             echo '<div class="error-message message">Erreur de connexion à la base de données: ' . $e->getMessage() . '</div>';
