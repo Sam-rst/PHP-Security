@@ -14,7 +14,7 @@
 
 class FormulaireData
 {
-    private $formSubmitted = false;
+    private BOOL $formSubmitted = false;
     private $data = [];
 
     public function __construct()
@@ -30,20 +30,20 @@ class FormulaireData
                 'description' => $_POST["description"]
             ];
 
-            $this->handleFormSubmission();
+            $this->VerificationFormulairePlein();
         }
     }
 
-    public function handleFormSubmission()
+    public function VerificationFormulairePlein()
     {
-        if ($this->validateFormData()) {
+        if ($this->FiltreFormulaire()) {
             $this->formSubmitted = $this->insertData();
         } else {
             echo '<div class="error-message message">Veuillez remplir correctement tous les champs du formulaire.</div>';
         }
     }
 
-    public function validateFormData()
+    public function FiltreFormulaire()
     {
         foreach ($this->data as $key => $value) {
             if (empty($value)) {
@@ -76,11 +76,17 @@ class FormulaireData
             if ($checkResult) {
                 echo '<div class="error-message message">L\'email est déjà utilisé</div>';
             } else {
-                $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $insertStmt->execute([
-                    $this->data['firstname'], $this->data['lastname'], $this->data['password'],
-                    $this->data['email'], $this->data['phone'], $this->data['birthday'], $this->data['description']
-                ]);
+                $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (:firstname, :lastname, :password, :email, :phone, :birthday, :description)");                $insertStmt->bindParam(':firstname', $this->data['firstname']);
+                
+                $insertStmt->bindParam(':firstname', $this->data['firstname'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':lastname', $this->data['lastname'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':password', $this->data['password'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':email', $this->data['email'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':phone', $this->data['phone'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':birthday', $this->data['birthday'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':description', $this->data['description'], PDO::PARAM_STR);
+            
+                $insertStmt->execute();
                 return true;
             }
         } catch (PDOException $e) {
