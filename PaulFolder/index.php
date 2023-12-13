@@ -90,44 +90,44 @@
 
         <div class="form-control">
             <label for="firstname">Prénom:</label>
-            <input type="text" name="firstname" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" title="Veuillez entrer un prénom valide" required>
+            <input type="text" name="firstname" id="firstname" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" title="Veuillez entrer un prénom valide">
             <small>Error message</small>
         </div>
 
         <div class="form-control">
             <label for="lastname">Nom:</label>
-            <input type="text" name="lastname" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" title="Veuillez entrer un nom valide" required>
+            <input type="text" name="lastname" id="lastname" pattern="[A-Za-zÀ-ÖØ-öø-ÿ\s]+" title="Veuillez entrer un nom valide">
             <small>Error message</small>
         </div>
 
         <div class="form-control">
             <label for="password">Mot de passe:</label>
-            <input type="password" name="password" pattern=".{5,}" title="Le mot de passe doit contenir au moins 8 caractères" required>
+            <input type="password" name="password" id="password" pattern=".{5,}" title="Le mot de passe doit contenir au moins 8 caractères">
             <small>Error message</small>
         </div>
 
         <div class="form-control">
             <label for="email">Email:</label>
-            <input type="email" name="email" required>
+            <input type="email" name="email" id="email">
             <small>Error message</small>
         </div>
 
 
         <div class="form-control">
             <label for="phone">Numéro de téléphone:</label>
-            <input type="tel" name="phone" pattern="[0-9]{10}" title="Veuillez entrer un numéro de téléphone valide" required>
+            <input type="tel" name="phone" id="phone" pattern="[0-9]{10}" title="Veuillez entrer un numéro de téléphone valide">
             <small>Error message</small>
         </div>
 
         <div class="form-control">
             <label for="birthday">Date de naissance:</label>
-            <input type="date" name="birthday" required>
+            <input type="date" name="birthday" id="birthday">
             <small>Error message</small>
         </div>
 
         <div class="form-control">
             <label for="description">Description:</label>
-            <textarea id="description" name="description" rows="4" cols="50" required></textarea>
+            <textarea id="description" name="description" id="description" rows="4" cols="50"></textarea>
             <small>Error message</small>
         </div>
 
@@ -155,5 +155,6 @@
     ?>
 
 </body>
+<script src="validation-form.js"></script>
 
 </html>
