@@ -33,21 +33,20 @@
         }
     }
 
-    function validateFormData($data)
-    {
-        // Validation de chaque champ
-        foreach ($data as $value) {
-            if (empty($value)) {
-                return false;
-            }
-            $value = trim($value);
-            $value = filter_var($value, FILTER_SANITIZE_STRING);
-            if (empty($value)) {
-                return false;
-            }
+function validateFormData($data) {
+    // Validation de chaque champ
+    foreach ($data as $value) {
+        if (empty($value)) {
+            return false;
         }
-        return true;
+        $value = trim($value);
+        $value = filter_var($value, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
+        if (empty($value)) {
+            return false;
+        }
     }
+    return true;
+}
 
     function insertData($data)
     {
@@ -85,7 +84,7 @@
     }
     ?>
 
-    <form id="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+<form id="form" method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
         <h2>Formulaire</h2>
 
         <div class="form-control">
