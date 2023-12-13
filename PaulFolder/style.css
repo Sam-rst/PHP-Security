@@ -61,26 +61,31 @@ input[type="submit"]:hover {
     background-color: #45a049;
 }
 
-.success-message {
-    color: #008000;
-    font-weight: bold;
-    text-align: center;
+.form-control {
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+    position: relative;
 }
 
-.error-message {
-    color: #FF0000;
-    font-weight: bold;
-    text-align: center;
+.form-control label {
+    color: #777;
+    display: block;
+    margin-bottom: 5px;
 }
 
-.submitted-data {
-    background-color: #ffffff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+.form-control input, .form-control textarea {
+    border: 2px solid #f0f0f0;
+    border-radius: 4px;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    font-size: 14px;
 }
 
+.form-control input:focus {
+    outline: 0;
+    border-color: #777;
+}
 
 .form-control.success input {
     border-color: var(--success-color);
