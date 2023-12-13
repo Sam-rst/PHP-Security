@@ -11,7 +11,7 @@
 <body>
 
 <?php
-
+// FAIT PAR PAUL LE GOAT
 class FormulaireData
 {
     private $formSubmitted = false;
@@ -43,7 +43,7 @@ class FormulaireData
         }
     }
 
-    public function validateFormData()
+    public function validateFormData():bool
     {
         foreach ($this->data as $key => $value) {
             if (empty($value)) {
@@ -76,12 +76,17 @@ class FormulaireData
             if ($checkResult) {
                 echo '<div class="error-message message">L\'email est déjà utilisé</div>';
             } else {
-                $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (?, ?, ?, ?, ?, ?, ?)");
-                $insertStmt->execute([
-                    $this->data['firstname'], $this->data['lastname'], $this->data['password'],
-                    $this->data['email'], $this->data['phone'], $this->data['birthday'], $this->data['description']
-                ]);
-                return true;
+                $insertStmt = $conn->prepare("INSERT INTO formulaire_data (firstname, lastname, password, email, phone, birthday, description) VALUES (:firstname, :lastname, :password, :email, :phone, :birthday, :description)");
+
+                $insertStmt->bindParam(':firstname', $this->data['firstname'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':lastname', $this->data['lastname'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':password', $this->data['password'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':email', $this->data['email'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':phone', $this->data['phone'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':birthday', $this->data['birthday'], PDO::PARAM_STR);
+                $insertStmt->bindParam(':description', $this->data['description'], PDO::PARAM_STR);
+
+                $insertStmt->execute();
             }
         } catch (PDOException $e) {
             echo '<div class="error-message message">Erreur de connexion à la base de données: ' . $e->getMessage() . '</div>';
